@@ -13,23 +13,27 @@ $user = $_SESSION['user'];
 $idk = isset($_GET['idk']) ? $_GET['idk'] : 0;
 $idr = isset($_GET['idr']) ? $_GET['idr'] : 0;
 if($idk == 0 || $idr == 0) header("location:./index.php");
+$hal = 1;
+$berhasil = '';
+$pesan = '';
 
 head($nama, $idk); //fungsi head di inc.php, berisi tag html <head> ... </head><body>
-	$currentDir = getcwd();
-    $uploadDirectory = "/uploads/";
-    $errors = array(); // Store all foreseen and unforseen errors here
-
-    $fileExtensions = array('jpeg','jpg','png'); // Get all the file extensions
-
-    $fileName = $idr."-".$db->max_text($db->lihatRincianKegiatan($idr, $idk, "uraian"), 15, 0);
-    $fileSize = $_FILES['bukti']['size'];
-    $fileTmpName  = $_FILES['bukti']['tmp_name'];
-    $fileType = $_FILES['bukti']['type'];
-    $fileExtension = strtolower(end(explode('.',$_FILES['bukti']['name'])));
-
-    $uploadPath = $currentDir . $uploadDirectory . $idp."/".$idk."/";
-
     if (isset($_POST['unggah'])) {
+		$currentDir = getcwd();
+		$uploadDirectory = "/uploads/";
+		$errors = array(); // Store all foreseen and unforseen errors here
+	
+		$fileExtensions = array('jpeg','jpg','png'); // Get all the file extensions
+	
+		$fileName = $idr."-".$db->max_text($db->lihatRincianKegiatan($idr, $idk, "uraian"), 15, 0);
+		$fileSize = $_FILES['bukti']['size'];
+		$fileTmpName  = $_FILES['bukti']['tmp_name'];
+		$fileType = $_FILES['bukti']['type'];
+		$exp = explode('.',$_FILES['bukti']['name']);
+		$fileExtension = strtolower(end($exp));
+	
+		$uploadPath = $currentDir . $uploadDirectory . $idp."/".$idk."/";
+	
 		if(!is_dir($uploadPath)) {
 			mkdir($uploadPath, 0777, true);
 			$file_index = fopen($uploadPath.'index.php', 'w');
@@ -67,7 +71,7 @@ head($nama, $idk); //fungsi head di inc.php, berisi tag html <head> ... </head><
         	if(file_exists($uploadPath)) unlink($uploadPath);//memastikan jmlah bukti di mysql bertambah jika foto juga bertambah dalam dir
             $didUpload = move_uploaded_file($fileTmpName, $uploadPath);
 			$query = "UPDATE rincian_kegiatan SET bukti = 1 WHERE id = '$idr' AND idk = '$idk' AND idp = '$idp'";
-			$hasil = mysqli_query($this->con, $query) or $errors[] = mysqli_error($this->con); //query untuk tabel rincian_kegiatan
+			$hasil = mysqli_query($db->con, $query) or $errors[] = mysqli_error($db->con); //query untuk tabel rincian_kegiatan
 
             if ($didUpload && $hasil) {
                 $berhasil = file_exists($uploadPath).' Foto <b>'.basename($fileName).'.'.$fileExtension.'</b> [<i>'.$fs.' '.$byte.'</i>] berhasil diunggah sebagai bukti keuangan.';

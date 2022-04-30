@@ -12,6 +12,7 @@ $nama = $_SESSION['nama'];
 $user = $_SESSION['user'];
 $idk = isset($_GET['idk']) ? $_GET['idk'] : 0;
 $hal = isset($_GET['hal']) ? $_GET['hal'] : 1;
+$id = 0;
 if($idk == 0) header("location:./index.php");
 head($nama, $idk, "zipbukti");
 
@@ -34,6 +35,7 @@ echo '
 		$uraian = $_POST['uraian'];
 		$debit = $_POST['debit'];
 		$kredit = $_POST['kredit'];
+		$cek = mysqli_num_rows(mysqli_query($db->con, "SELECT id FROM rincian_kegiatan WHERE uraian = BINARY '$uraian' AND idk = '$idk'"));
 		if($cek > 0) {
 			//notif kegiatan pernah ditambahkan
 			echo '
@@ -287,9 +289,23 @@ if(isset($_POST['ubahBtn'])) {
 		</div>
 		';
 		} else {
-			$cek = mysqli_num_rows(mysqli_query($this->con, "SELECT id FROM rincian_kegiatan WHERE uraian = BINARY '$rincian' AND idk = '$idk'"));
-			//notif kegiatan berhasil ditambahkan
-				$db->updateRincianKegiatan3($idp, $id_kegiatan, $id_rincian, $uraian, $debit, $kredit, $rincian_sebelum, $debit_sebelum, $kredit_sebelum, $hal);
+			$cek = mysqli_num_rows(mysqli_query($db->con, "SELECT id FROM rincian_kegiatan WHERE uraian = BINARY '$uraian' AND idk = '$idk'"));
+			if($cek > 0) {
+				//notif  rincian kegiatan gagal ditambahkan, sudah ada sebelumnyas
+				echo '
+				<div class="red-text  card grey lighten-4 center-align">
+				Uraian sudah ada !
+				</div>
+				';
+			} else {
+				//notif kegiatan berhasil diupdate
+				echo '
+				<div class="green-text card grey lighten-4 center-align">
+					Berhasil mengupdate data !
+				</div>
+				';
+				$db->updateRincianKegiatan3($idp, $id_kegiatan, $id_rincian, $uraian, $debit, $kredit, $uraian_sebelum, $debit_sebelum, $kredit_sebelum, $hal);
+			}
 		}
 	}
 	$hal = isset($_GET['hal']) ? $_GET['hal'] : 1;
@@ -316,7 +332,7 @@ echo '
 	<script>
 		$(document).ready(function() {
 		    $.ajax({
-		        url:"http://localhost/p1/api.php?a=1&s=1-4-12-14&idk='.$idk.'&idr='.$id.'",
+		        url:"'.URL.'api.php?a=1&s=1-4-12-14&idk='.$idk.'&idr='.$id.'",
 		        method:"GET", //First change type to method here
 				contentType: "application/json",
 				dataType: "json",

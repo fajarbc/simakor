@@ -15,7 +15,8 @@ include('config.php');
 
 
 define("FBC", "Simakor");
-error_reporting(0);
+if(IS_DEV) error_reporting(E_ALL);
+else error_reporting(0);
 
 function head($judul = "Simakor", $opsi = 0, $zipbukti = '') {
 	echo '
@@ -81,8 +82,9 @@ function foot($s = 0) {
 }
 
  class database {
- 	private $con, $dbHost, $dbUser, $dbName, $dbPass;
-	public	$maksimal_per_halaman = 5,
+ 	private $dbHost, $dbUser, $dbName, $dbPass;
+	public	$con,
+			$maksimal_per_halaman = 5,
 			$order_kegiatan = "id",
 			$order_rincian = "uraian",
 			$sort_kegiatan = "ASC",
@@ -150,8 +152,8 @@ function foot($s = 0) {
 		$idp = $this->clean($idp);
 		$idk = $this->clean($idk);
 		$uraian = $this->clean($uraian);
-		$debit = ($this->clean($debit));
-		$kredit = ($this->clean($kredit));
+		$debit = intval($this->clean($debit));
+		$kredit = intval($this->clean($kredit));
 		$debit_new = abs($this->lihatKegiatan($idk, "debit") + $debit);
 		$kredit_new = abs($this->lihatKegiatan($idk, "kredit") + $kredit);
 		$saldo_new = $debit_new - $kredit_new;
@@ -226,14 +228,15 @@ function foot($s = 0) {
 			$query = "SELECT * FROM rincian_kegiatan WHERE id = '$id'";
 			$hasil = mysqli_query($this->con, $query);
 			$data = mysqli_fetch_array($hasil);
-			if($type == 'idp') return $data['idp'];
-			else if($type == 'idk') return $data['idk'];
-			else if($type == 'tanggal') return $data['tanggal'];
-			else if($type == 'uraian') return $data['uraian'];
-			else if($type == 'debit') return $data['debit'];
-			else if($type == 'kredit') return $data['kredit'];
-			else if($type == 'saldo') return $data['saldo'];
-			else if($type == 'bukti') return $data['bukti'];
+			if(!$data) return null;
+			elseif($type == 'idp') return $data['idp'];
+			elseif($type == 'idk') return $data['idk'];
+			elseif($type == 'tanggal') return $data['tanggal'];
+			elseif($type == 'uraian') return $data['uraian'];
+			elseif($type == 'debit') return $data['debit'];
+			elseif($type == 'kredit') return $data['kredit'];
+			elseif($type == 'saldo') return $data['saldo'];
+			elseif($type == 'bukti') return $data['bukti'];
 			else return $data['id'];
 		}
 	}
@@ -390,7 +393,7 @@ function foot($s = 0) {
 			while($data = mysqli_fetch_array($hasil)) {
 				$no++;
 				$idr = $data['id'];
-				$saldo += ($data['debit'] - $data['kredit']);
+				$saldo += (intval($data['debit']) - intval($data['kredit']));
 				echo '
 				<tr>
 					<td class="center-align">'.$no.'</td>

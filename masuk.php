@@ -1,11 +1,11 @@
 <?php
 include 'inc.php';
 
-$user = strip_tags(strtolower($_POST['user']));
-$sandi = $_POST['sandi'];
+$user = strip_tags(strtolower(isset($_POST['user']) ? $_POST['user'] : null));
+$sandi = isset($_POST['sandi']) ? $_POST['sandi'] : null;
 session_start();
 //cek apakah sudah login
-if($_SESSION['status'] =="login"){
+if(isset($_SESSION['status']) && $_SESSION['status'] =="login"){
 	header("location:./");
 }
 
@@ -50,7 +50,7 @@ if(isset($_POST['masuk'])) {
 		$_SESSION['user'] = $row['user'];
 		$_SESSION['status'] = 'login';
 		$_SESSION['terakhir_online'] = $terakhir_online;
-		$query = mysqli_query($this->con, "UPDATE pengguna SET terakhir_online = '$terakhir_online' WHERE id = '$idp'");
+		$query = mysqli_query($db->con, "UPDATE pengguna SET terakhir_online = '$terakhir_online' WHERE id = '$idp'");
 		header('location:index.php');
 	} else {
 		//notif jika login gagal

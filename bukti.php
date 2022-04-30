@@ -13,6 +13,7 @@ $user = $_SESSION['user'];
 $tipe = isset($_GET['t']) ? $_GET['t'] : 0;
 $idk = isset($_GET['idk']) ? $_GET['idk'] : 0;
 $idr = isset($_GET['idr']) ? $_GET['idr'] : 0;
+$hal = 1;
 
 head($nama, $idk, 'zipbukti'); //fungsi head di inc.php, berisi tag html <head> ... </head><body>
 
@@ -48,70 +49,75 @@ echo '
 ';
 $path = './uploads/'.$idp.'/';
 if($idk != 0) $path .= $idk.'/';
-$files = array_values( //menyusun ulang key dari array
-			array_diff( //menurangi/menghilangkan value array
-				scandir($path), //scan directory. (parameter) sumber array yg akan dikurangi
-				array('..', '.')) //(parameter) array yang dikurangi dari sumber
-			);
-$ext = array("php", "zip");
-$ext_hapus = array("zip");
-//print_r($files);
-$files_idr = array();
-$files_hapus = array();
-$arr = array();
-$array = array();
-$array = $files;
-for($i=1; $i <= count($files); $i++) {
-	if(strpos($files[$i-1], $idr.'-') !== false) $files_idr[] = $files[$i-1];
-}
-if($idr != 0) $array = $files_idr;
-for($i=1; $i <= count($array); $i++) {
-	if(!in_array(getExt($array[$i-1]), $ext)) $arr[] = $array[$i-1]; // untuk idr tertentu saja
-	if(in_array(getExt($array[$i-1]), $ext_hapus)) $files_hapus[] = $array[$i-1];
-}
+if(is_dir($path)) {
+	$files = array_values( //menyusun ulang key dari array
+				array_diff( //menurangi/menghilangkan value array
+					scandir($path), //scan directory. (parameter) sumber array yg akan dikurangi
+					array('..', '.')) //(parameter) array yang dikurangi dari sumber
+				);
+	$ext = array("php", "zip");
+	$ext_hapus = array("zip");
+	//print_r($files);
+	$files_idr = array();
+	$files_hapus = array();
+	$arr = array();
+	$array = array();
+	$array = $files;
+	for($i=1; $i <= count($files); $i++) {
+		if(strpos($files[$i-1], $idr.'-') !== false) $files_idr[] = $files[$i-1];
+	}
+	if($idr != 0) $array = $files_idr;
+	for($i=1; $i <= count($array); $i++) {
+		if(!in_array(getExt($array[$i-1]), $ext)) $arr[] = $array[$i-1]; // untuk idr tertentu saja
+		if(in_array(getExt($array[$i-1]), $ext_hapus)) $files_hapus[] = $array[$i-1];
+	}
 
-//print_r($arr);
-for($i=1; $i <= count($files_hapus); $i++) {
-	//menghapus file zip sebelumnya
-	$file_hapus = './uploads/'.$idp.'/'.$idk.'/'.$files_hapus[$i-1];
-	$now = strtotime(date("YmdHis"));
-	$date_file =strtotime(date("YmdHis", filemtime($file_hapus)));
-	if(round(($now-$date_file)/60) >= 60 ) unlink($file_hapus); //menghapus setelah 60 menit
-}
-for($i=1; $i <= count($arr); $i++) {
-	
-  echo '
-	<div class="row valign-wrapper">
-		<div class="col s12 m12">
-			<a href="./unduh.php?idk='.$idk.'&fn='.$arr[$i-1].'" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="Klik untuk mengunduh">
-      		<div class="card">
-        		<div class="card-image">
-          			<img src="./uploads/'.$idp.'/'.$idk.'/'.$arr[$i-1].'">
-          			<a href="./unduh.php?idk='.$idk.'&fn='.$arr[$i-1].'" class="btn-floating halfway-fab waves-effect waves-light cyan right tooltipped" data-position="bottom" data-delay="100" data-tooltip="Klik untuk mengunduh"><i class="material-icons">cloud_download</i></a>
-		        </div>
-    	    </a>
-				<div class="card-content">
-        	  		<p class="black-text">'.$arr[$i-1].'</p>
-	        	</div>
+	//print_r($arr);
+	for($i=1; $i <= count($files_hapus); $i++) {
+		//menghapus file zip sebelumnya
+		$file_hapus = './uploads/'.$idp.'/'.$idk.'/'.$files_hapus[$i-1];
+		$now = strtotime(date("YmdHis"));
+		$date_file =strtotime(date("YmdHis", filemtime($file_hapus)));
+		if(round(($now-$date_file)/60) >= 60 ) unlink($file_hapus); //menghapus setelah 60 menit
+	}
+	for($i=1; $i <= count($arr); $i++) {
+		
+	echo '
+		<div class="row valign-wrapper">
+			<div class="col s12 m12">
+				<a href="./unduh.php?idk='.$idk.'&fn='.$arr[$i-1].'" class="tooltipped" data-position="bottom" data-delay="100" data-tooltip="Klik untuk mengunduh">
+				<div class="card">
+					<div class="card-image">
+						<img src="./uploads/'.$idp.'/'.$idk.'/'.$arr[$i-1].'">
+						<a href="./unduh.php?idk='.$idk.'&fn='.$arr[$i-1].'" class="btn-floating halfway-fab waves-effect waves-light cyan right tooltipped" data-position="bottom" data-delay="100" data-tooltip="Klik untuk mengunduh"><i class="material-icons">cloud_download</i></a>
+					</div>
+				</a>
+					<div class="card-content">
+						<p class="black-text">'.$arr[$i-1].'</p>
+					</div>
+				</div>
 			</div>
-		</div>
-  </div>
-	';
+	</div>
+		';
+	}
+	echo '</div>';
+
+	if(isset($_GET['zip'])) {
+		$files = $arr;
+		$destination = './uploads/'.$idp.'/'.$idk.'/';
+		$filename = $idp.'-'.$idk.'-'.$db->max_text($db->lihatRincianKegiatan($idr, $idk, 'uraian'), 15, 0).'-'.date('YmdHis').'.zip';
+		$result = createZip($files, $destination, $filename);
+	//	print_r($array);
+		if($result === true) echo '
+		<script>
+			window.location.href="./unduh.php?idk='.$idk.'&fn='.$filename.'";
+		</script>';
+	}
+} else {
+	echo '<div class="row valign-wrapper">Tidak ada data</div>';
 }
 echo '</div>';
 
-if(isset($_GET['zip'])) {
-	$files = $arr;
-	$destination = './uploads/'.$idp.'/'.$idk.'/';
-	$filename = $idp.'-'.$idk.'-'.$db->max_text($db->lihatRincianKegiatan($idr, $idk, 'uraian'), 15, 0).'-'.date('YmdHis').'.zip';
-	$result = createZip($files, $destination, $filename);
-//	print_r($array);
-	if($result === true) echo '
-	<script>
-		window.location.href="./unduh.php?idk='.$idk.'&fn='.$filename.'";
-	</script>';
-}
-echo '</div>';
 foot(1);
 
 function createZip($files = array(), $destination = '', $namafile = 'file.zip', $overwrite = false) {
@@ -140,7 +146,8 @@ function createZip($files = array(), $destination = '', $namafile = 'file.zip', 
 }
 
 function getExt($str) {
-	return end(explode(".", $str));
+	$exp = explode(".", $str);
+	return end($exp);
 }
 
 ?>

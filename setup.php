@@ -29,8 +29,8 @@ if(isset($_POST['daftar'])) {
 	$tanggal = date('Y-m-d');
 	$terakhir_online = date('Y-m-d-H-i-s');
 	$err = 0;
-	$cek = mysqli_num_rows(mysqli_query($this->con, "SELECT * FROM pengguna WHERE user = '$user'"));
-	$cek2 = mysqli_num_rows(mysqli_query($this->con, "SELECT * FROM pengguna WHERE email = '$email'"));
+	$cek = mysqli_num_rows(mysqli_query($db->con, "SELECT * FROM pengguna WHERE user = '$user'"));
+	$cek2 = mysqli_num_rows(mysqli_query($db->con, "SELECT * FROM pengguna WHERE email = '$email'"));
 	if($cek > 0) {
 		echo '
 		<div class="red-text  card grey lighten-4 center-align">
@@ -47,7 +47,7 @@ if(isset($_POST['daftar'])) {
 	//menambahkan pengguna
 		$query = "INSERT INTO pengguna (id, nama, user, email, sandi, tanggal, terakhir_online, halaman_terakhir)
 					VALUES (NULL, '$nama', '$user', '$email', '$sandi', '$tanggal', '$terakhir_online', '')";
-		$hasil = mysqli_query($this->con, $query) or $mysqli_error = mysqli_error($this->con);
+		$hasil = mysqli_query($db->con, $query) or $mysqli_error = mysqli_error($db->con);
 		if($hasil) {
 			echo '
 		<div class="green-text card grey lighten-4 center-align">

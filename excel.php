@@ -56,7 +56,7 @@ echo '
 <?php
 if($idk == 0) {
 		$query = "SELECT id FROM kegiatan WHERE idp = '$idp'";
-		$hasil = mysqli_query($this->con, $query);
+		$hasil = mysqli_query($db->con, $query);
 		$total_data = mysqli_num_rows($hasil);
 		if($total_data > 0) {
 			$no = 0;
@@ -64,7 +64,7 @@ if($idk == 0) {
 			$total_debit = 0;
 			$total_kredit = 0;
 			$query = "SELECT * FROM kegiatan WHERE idp = '$idp' ORDER BY $db->order_kegiatan $db->sort_kegiatan";
-			$hasil = mysqli_query($this->con, $query);
+			$hasil = mysqli_query($db->con, $query);
 
 			echo '
 		<tr>
@@ -106,7 +106,7 @@ if($idk == 0) {
 							';
 } else {
 		$query = "SELECT id FROM rincian_kegiatan WHERE idk = '$idk' AND idp = '$idp'";
-		$hasil = mysqli_query($this->con, $query);
+		$hasil = mysqli_query($db->con, $query);
 		$total_data = mysqli_num_rows($hasil);
 		if($total_data > 0) {
 			$no = 0;
@@ -114,7 +114,7 @@ if($idk == 0) {
 			$total_debit = 0;
 			$total_kredit = 0;
 			$query = "SELECT * FROM rincian_kegiatan WHERE idk = '$idk' AND idp = '$idp' ORDER BY $db->order_rincian $db->sort_rincian";
-			$hasil = mysqli_query($this->con, $query) or die(mysqli_error($this->con));
+			$hasil = mysqli_query($db->con, $query) or die(mysqli_error($db->con));
 
 			echo '
 		<tr>
